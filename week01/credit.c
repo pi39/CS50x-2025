@@ -1,3 +1,6 @@
+/*
+Author: pi39
+*/
 #include <stdio.h>
 #include <math.h> 
 
