@@ -2,126 +2,115 @@
 Author: pi39
 */
 #include <stdio.h>
-#include <math.h> 
+#include <math.h>
+#include <stdbool.h> 
 
-int checksum( long number);
-void card_type(long n);
+int credit_length(long credit_number);
+bool checksum(long credit_number);
+void credit_type(long credit_number);
 
 int main(void)
-{  
-     // Ask  the user for credit number and store it
+{
     long credit_number;
-    printf("Number: ");
+    printf("Enter Credit Number: ");
     scanf("%li", &credit_number);
     
-    //checks if the card is valid or no
-    checksum(credit_number);
-     
-    if (checksum(credit_number) % 10 != 0)
-    {
-        printf("\nINVALID\n");
-    }
-
-    else
-    {
-      card_type(credit_number);
-    }
+    credit_type(credit_number);
+    
 }
 
-int checksum(long number)    
-{   //Function checks if the card number is gas or ass by an eqation and other bullshit
+int credit_length(long credit_number)
+{   // finds the length of credit number in digits
 
-    int second_to_last = 0;
-    int first_to_beforelast = 0;
+    long i = 1;
+    int length = 0;
 
+    while (credit_number / i != 0)
+    {
+        i *= 10;
+        length++;
+    }
 
-   for(int i = 16; i >= 1; i--)
-   {    
+    return length;
+}
+
+bool checksum(long credit_number)
+{ // checks wether a credit number is vaild by luhn algorithm 
+
+    int length = credit_length(credit_number);
+    int even_pos_digits = 0;
+    int odd_pos_digits = 0;
+
+    for (int i = 2; i <= length; i += 2)
+    { // for spliting each even postioned digit then multiply by 2 then adding it 
          long first = pow(10,i);
          long second = pow(10,i-1);
          long base = pow(10,i-1);
 
-         // Equation for isolating each digit
-         long digit = ((number % first) - (number % second))/base;
-        
-         // Take the second to last digit, then multiply by 2, then adding them.
-         if (i % 2 == 0 && i != 1)
-         { 
-            // For slpiting digits of n * 2 if two digit, then adding each digit to the rest.
-            if ((digit * 2) > 9)
-            {   
-                for(int j = 1; j <= 2; j++)
-                {
-                     int third = pow(10,j);
-                     int fourth = pow(10,j-1);
-                     int base2 = pow(10,j-1);
-                     int digit2 = ((digit * 2 % third) - (digit * 2 % fourth))/base2;
-
-                     second_to_last += digit2;
-                }
-            }
-
-            // just adding them.
-            else if (digit * 2 <= 9)
-            {
-                 second_to_last += digit*2;
-            }
+         int digit = ((credit_number % first) - (credit_number % second))/base;
+			
+         if (digit * 2 > 9)
+         { // spliting it after multipling it if necceary
+            even_pos_digits += (digit * 2) / 10;
+            even_pos_digits += (digit * 2) % 10;
          }
 
-         // Take the rest (first to second last) and just adding them.
          else
          {
-            first_to_beforelast += digit;
-         }
-
-   } //4003600000000014 5299999999999990
-
-   // Final number, if first digit is 0, then card is valid
-   int check = second_to_last + first_to_beforelast;
-   
-   return check;
-}
-
-void card_type(long n)
-{
-    int first_digit = 0, second_digit = 0, control = 15;
-
-    for(int k = 16; k >= control; k--)
-         {
-             long third = pow(10,k);
-             long fourth = pow(10,k-1);
-             long base3 = pow(10,k-1);
-             long digit3 = ((n % third) - (n % fourth))/base3;
-
-             if(digit3 == 0)
-               {
-                control--;
-               }
-
-             if(k == control + 1)
-                {   
-                        first_digit += digit3;
-                }
-
-             else if(k == control)
-                {
-                        second_digit += digit3;
-                }
-        }
-
-    if (first_digit == 5 && (second_digit == 1 || second_digit == 2 || second_digit == 3 || second_digit == 4 || second_digit == 5))
-    {
-        printf("MasterCard\n");
+            even_pos_digits += digit * 2;
+         } 
     }
 
-    else if(first_digit == 3 && (second_digit == 4 || second_digit == 7))
-    {
-        printf("American Express\n");
+    for (int i = 1; i <= length; i += 2)
+    { // for spliting each odd postioned digit then adding it 
+         long first = pow(10,i);
+         long second = pow(10,i-1);
+         long base = pow(10,i-1);
+
+         int digit = ((credit_number % first) - (credit_number % second))/base;
+
+         odd_pos_digits += digit;
     }
     
-    else if (first_digit == 4)
+    if ((even_pos_digits + odd_pos_digits) % 10 == 0)
     {
-        printf("VISA\n");
+        return true;
+    }
+
+    else
+    {
+        return false;
+    }
+}
+
+void credit_type(long credit_number)
+{ //This function identify the type of card by the last two or one digit
+	
+    int length = credit_length(credit_number);
+
+    if (checksum(credit_number) == false)
+    {
+        printf("INVALID");
+    }
+
+    else if (checksum(credit_number) == true)
+    {
+        int last_two_digit = credit_number / pow(10,length - 2);
+
+        if (last_two_digit >= 51 && last_two_digit <= 55)
+        {
+            printf("MasterCard\n");
+        }
+        
+        else if (last_two_digit == 34 || last_two_digit == 37)
+        {
+            printf("American Express\n");
+        }
+        
+        else if (last_two_digit / 10 == 4)
+        {
+            printf("VISA\n");
+        }
     }
 }
 
